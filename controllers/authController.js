@@ -26,7 +26,7 @@ const login = (req, res) => {
                 usuario: user.usuario
             };
             req.session.save((err) => {
-                res.redirect('/dashboard');
+                res.redirect(302, '/dashboard');
             });
         } else {
             console.log("Contraseña incorrecta.");

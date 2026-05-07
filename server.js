@@ -15,12 +15,17 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Configurar sesiones
+// Configurar sesiones (cookies seguras en producción)
+app.set('trust proxy', 1); // confiar en el primer proxy (Render)
 app.use(session({
     secret: 'solo-frenos-secret-key',
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false } // en producción debería ser true con HTTPS
+    cookie: {
+        secure: true,          // solo se envía por HTTPS
+        sameSite: 'lax',       // evita pérdida de cookie en redirecciones
+        maxAge: 24 * 60 * 60 * 1000 // 1 día (opcional)
+    }
 }));
 
 // Middleware global para pasar usuario a las vistas
