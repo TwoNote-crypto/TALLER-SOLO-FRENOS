@@ -1,0 +1,19 @@
+{
+  "name": "taller-solo-frenos",
+  "version": "1.0.0",
+  "description": "Sistema POS para Taller Solo Frenos",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "init-db": "node init_db.js"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.2",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "multer": "^2.1.1",
+    "sqlite3": "^5.1.6"
+  }
+}

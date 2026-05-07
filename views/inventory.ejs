@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Inventario - Solo Frenos</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .inventory-stats { display: flex; gap: 20px; margin-bottom: 30px; }
+        .stat-box { background: var(--bg-panel); padding: 20px; border-radius: 10px; border: 1px solid var(--border-color); flex: 1; }
+        .stat-box h4 { color: var(--text-muted); text-transform: uppercase; font-size: 0.8rem; margin-bottom: 10px; }
+        .stat-box .num { font-size: 2rem; font-weight: bold; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; }
+        .bg-gray { background: #333; }
+        .status-bar-container { width: 60px; height: 6px; background: #333; border-radius: 3px; overflow: hidden; display: inline-block; vertical-align: middle; margin-left: 10px; }
+        .status-fill { height: 100%; }
+        .fill-green { background: var(--success); }
+        .fill-red { background: var(--primary-red); }
+        .fill-orange { background: var(--warning); }
+        .fill-orange { background: var(--warning); }
+        
+        /* Modal Styles */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: var(--bg-panel); padding: 30px; border-radius: 12px; border: 1px solid var(--border-color); width: 100%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
+        .close-modal { background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
+        .close-modal:hover { color: white; }
+        
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; color: #ccc; font-size: 0.85rem; }
+        .form-control { width: 100%; padding: 10px; background: #111; border: 1px solid #444; color: white; border-radius: 6px; }
+        .form-row { display: flex; gap: 15px; }
+        .form-row .form-group { flex: 1; }
+        
+        .prod-img-thumb { width: 40px; height: 40px; object-fit: cover; border-radius: 5px; background: #333; display: inline-block; vertical-align: middle; margin-right: 10px; }
+    </style>
+</head>
+<body>
+
+    <%- include('partials/sidebar', { page: 'inventory' }) %>
+
+    <div class="main-content">
+        <%- include('partials/topbar', { pageTitle: 'Inventario de Repuestos' }) %>
+
+        <div class="dashboard-content">
+            <div class="inventory-stats">
+                <div class="stat-box">
+                    <h4>Total Productos 📦</h4>
+                    <div class="num"><%= stats.totalProductos %></div>
+                </div>
+                <div class="stat-box" style="border-top: 4px solid var(--primary-red);">
+                    <h4>Stock Bajo ⚠️</h4>
+                    <div class="num text-red"><%= stats.stockBajo %></div>
+                    <p style="font-size:0.8rem; color:var(--text-muted); margin-top:5px;">Requiere atención</p>
+                </div>
+                <div class="stat-box">
+                    <h4>Valor de Inventario 💵</h4>
+                    <div class="num">$<%= stats.valorInventario.toLocaleString('es-CO') %></div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div style="padding: 15px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <input type="text" id="searchInput" placeholder="🔍 Buscar producto..." class="form-control" style="width:200px; display:inline-block; margin-right:10px;" onkeyup="filterTable('inventoryTable')">
+                        <button class="btn" style="background:#333; color:white;" onclick="exportTableToCSV('inventoryTable', 'inventario.csv')">📥 Exportar CSV</button>
+                    </div>
+                    <button class="btn btn-primary" onclick="document.getElementById('addModal').classList.add('active')">+ Agregar Producto</button>
+                </div>
+                <table id="inventoryTable">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Categoría</th>
+                            <th>Cantidad</th>
+                            <th>Precio</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% productos.forEach(p => { %>
+                            <tr>
+                                <td>
+                                    <% if (p.imagen) { %>
+                                        <img src="<%= p.imagen %>" class="prod-img-thumb" alt="<%= p.nombre %>">
+                                    <% } else { %>
+                                        <div class="prod-img-thumb" style="display:flex;align-items:center;justify-content:center;font-size:1.2rem;">⚙️</div>
+                                    <% } %>
+                                    <strong><%= p.nombre %></strong>
+                                </td>
+                                <td><span class="badge bg-gray"><%= p.categoria %></span></td>
+                                <td>
+                                    <%= p.cantidad %>
+                                    <div class="status-bar-container">
+                                        <% let color = p.cantidad > (p.stock_minimo * 2) ? 'fill-green' : (p.cantidad > p.stock_minimo ? 'fill-orange' : 'fill-red'); %>
+                                        <% let percent = Math.min((p.cantidad / (p.stock_minimo * 3)) * 100, 100); %>
+                                        <div class="status-fill <%= color %>" style="width: <%= percent %>%"></div>
+                                    </div>
+                                </td>
+                                <td>$<%= p.precio.toLocaleString('es-CO') %></td>
+                                <td>
+                                    <button class="btn" style="padding: 5px 10px; background: transparent; color: var(--text-muted); border: 1px solid #444;" onclick="openEditModal(<%= p.id %>, '<%= p.nombre.replace(/'/g, '\\\'') %>', '<%= p.categoria %>', <%= p.cantidad %>, <%= p.precio %>, <%= p.stock_minimo %>)">✏️ Editar</button>
+                                    <button class="btn" style="padding: 5px 10px; background: transparent; color: var(--primary-red); border: 1px solid #444; margin-left: 5px;" onclick="deleteProduct(<%= p.id %>)">🗑️ Eliminar</button>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Agregar Producto -->
+    <div class="modal" id="addModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Nuevo Producto</h2>
+                <button class="close-modal" onclick="document.getElementById('addModal').classList.remove('active')">&times;</button>
+            </div>
+            <form action="/api/productos" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label>Nombre del producto</label>
+                    <input type="text" name="nombre" class="form-control" required placeholder="Ej. Pastillas Brembo S4">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Categoría</label>
+                        <select name="categoria" class="form-control" required>
+                            <option value="Pastillas">Pastillas</option>
+                            <option value="Discos">Discos</option>
+                            <option value="Líquidos">Líquidos</option>
+                            <option value="Reparación">Reparación</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Cantidad (Stock inicial)</label>
+                        <input type="number" name="cantidad" class="form-control" required min="0" value="0">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Precio de venta ($)</label>
+                        <input type="number" step="0.01" name="precio" class="form-control" required min="0" placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label>Stock mínimo (Alerta)</label>
+                        <input type="number" name="stock_minimo" class="form-control" required min="1" value="10">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Imagen del producto</label>
+                    <input type="file" name="imagen" class="form-control" accept="image/*">
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Guardar Producto</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Editar Producto -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Producto</h2>
+                <button class="close-modal" onclick="document.getElementById('editModal').classList.remove('active')">&times;</button>
+            </div>
+            <form id="editForm" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label>Nombre del producto</label>
+                    <input type="text" id="edit_nombre" name="nombre" class="form-control" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Categoría</label>
+                        <select id="edit_categoria" name="categoria" class="form-control" required>
+                            <option value="Pastillas">Pastillas</option>
+                            <option value="Discos">Discos</option>
+                            <option value="Líquidos">Líquidos</option>
+                            <option value="Reparación">Reparación</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Cantidad (Stock)</label>
+                        <input type="number" id="edit_cantidad" name="cantidad" class="form-control" required min="0">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Precio de venta ($)</label>
+                        <input type="number" step="0.01" id="edit_precio" name="precio" class="form-control" required min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Stock mínimo (Alerta)</label>
+                        <input type="number" id="edit_stock_minimo" name="stock_minimo" class="form-control" required min="1">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Actualizar Imagen (Opcional)</label>
+                    <input type="file" name="imagen" class="form-control" accept="image/*">
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Actualizar Producto</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openEditModal(id, nombre, categoria, cantidad, precio, stock_minimo) {
+            document.getElementById('editForm').action = '/api/productos/edit/' + id;
+            document.getElementById('edit_nombre').value = nombre;
+            document.getElementById('edit_categoria').value = categoria;
+            document.getElementById('edit_cantidad').value = cantidad;
+            document.getElementById('edit_precio').value = precio;
+            document.getElementById('edit_stock_minimo').value = stock_minimo;
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function deleteProduct(id) {
+            if(confirm('¿Estás seguro de que deseas eliminar este producto? Esta acción no se puede deshacer.')) {
+                fetch('/api/productos/' + id, {
+                    method: 'DELETE'
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.success) {
+                        window.location.reload();
+                    } else {
+                        alert('Error al eliminar producto');
+                    }
+                });
+            }
+        }
+
+        // Filtro de tabla
+        function filterTable(tableId) {
+            const input = document.getElementById("searchInput").value.toUpperCase();
+            const table = document.getElementById(tableId);
+            const tr = table.getElementsByTagName("tr");
+            
+            for (let i = 1; i < tr.length; i++) {
+                let textValue = tr[i].textContent || tr[i].innerText;
+                if (textValue.toUpperCase().indexOf(input) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+
+        // Exportar a CSV
+        function exportTableToCSV(tableId, filename) {
+            const table = document.getElementById(tableId);
+            let csv = [];
+            for (let i = 0; i < table.rows.length; i++) {
+                let row = [], cols = table.rows[i].querySelectorAll("td, th");
+                // Ignorar la última columna (Acciones)
+                let length = (i === 0) ? cols.length - 1 : cols.length - 1; 
+                for (let j = 0; j < length; j++) {
+                    let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
+                    row.push('"' + data + '"');
+                }
+                csv.push(row.join(","));
+            }
+            const csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
+            const downloadLink = document.createElement("a");
+            downloadLink.download = filename;
+            downloadLink.href = window.URL.createObjectURL(csvFile);
+            downloadLink.style.display = "none";
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        }
+    </script>
+</body>
+</html>

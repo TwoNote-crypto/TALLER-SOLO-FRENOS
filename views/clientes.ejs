@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Clientes - Solo Frenos</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .table-container { background: var(--bg-panel); border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden; margin-top: 20px; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-right: 15px; }
+        
+        /* Modal Styles */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: var(--bg-panel); padding: 30px; border-radius: 12px; border: 1px solid var(--border-color); width: 100%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
+        .close-modal { background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
+        .close-modal:hover { color: white; }
+        
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; color: #ccc; font-size: 0.85rem; }
+        .form-control { width: 100%; padding: 10px; background: #111; border: 1px solid #444; color: white; border-radius: 6px; }
+    </style>
+</head>
+<body>
+
+    <%- include('partials/sidebar', { page: 'clientes' }) %>
+
+    <div class="main-content">
+        <%- include('partials/topbar', { pageTitle: 'Directorio de Clientes' }) %>
+
+        <div class="dashboard-content">
+            <div class="table-container">
+                <div style="padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="color: white; margin: 0;">Lista de Clientes Registrados</h3>
+                    <input type="text" id="searchClient" placeholder="🔍 Buscar nombre o cédula..." class="form-control" style="width:250px;" onkeyup="filterTable('clientTable', 'searchClient')">
+                </div>
+                <table id="clientTable">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Cédula / NIT</th>
+                            <th>Teléfono</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% clientes.forEach(c => { %>
+                            <tr>
+                                <td style="display: flex; align-items: center;">
+                                    <div class="avatar">👤</div>
+                                    <strong><%= c.nombre %></strong>
+                                </td>
+                                <td><%= c.cedula %></td>
+                                <td><%= c.telefono || 'No registrado' %></td>
+                                <td>
+                                    <button class="btn" style="padding: 5px 10px; background: transparent; color: var(--text-muted); border: 1px solid #444;" onclick="openEditModal(<%= c.id %>, '<%= c.nombre.replace(/'/g, '\\\'') %>', '<%= c.cedula %>', '<%= c.telefono || '' %>')">✏️ Editar</button>
+                                    <button class="btn" style="padding: 5px 10px; background: transparent; color: var(--primary-red); border: 1px solid #444; margin-left: 5px;" onclick="deleteCliente(<%= c.id %>)">🗑️ Eliminar</button>
+                                </td>
+                            </tr>
+                        <% }) %>
+                        <% if(clientes.length === 0) { %>
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: #888; padding: 30px;">
+                                    No hay clientes registrados aún. Los clientes se guardarán automáticamente al realizar una venta.
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Cliente -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Cliente</h2>
+                <button class="close-modal" onclick="document.getElementById('editModal').classList.remove('active')">&times;</button>
+            </div>
+            <form id="editForm" method="POST">
+                <div class="form-group">
+                    <label>Nombre del Cliente</label>
+                    <input type="text" id="edit_nombre" name="nombre" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Cédula / NIT</label>
+                    <input type="text" id="edit_cedula" name="cedula" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="text" id="edit_telefono" name="telefono" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Actualizar Cliente</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openEditModal(id, nombre, cedula, telefono) {
+            document.getElementById('editForm').action = '/api/clientes/edit/' + id;
+            document.getElementById('edit_nombre').value = nombre;
+            document.getElementById('edit_cedula').value = cedula;
+            document.getElementById('edit_telefono').value = telefono;
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function deleteCliente(id) {
+            if(confirm('¿Estás seguro de que deseas eliminar este cliente? Esta acción no se puede deshacer.')) {
+                fetch('/api/clientes/' + id, {
+                    method: 'DELETE'
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.success) {
+                        window.location.reload();
+                    } else {
+                        alert('Error al eliminar cliente');
+                    }
+                });
+            }
+        }
+
+        // Filtro de tabla
+        function filterTable(tableId, inputId) {
+            const input = document.getElementById(inputId).value.toUpperCase();
+            const table = document.getElementById(tableId);
+            const tr = table.getElementsByTagName("tr");
+            
+            for (let i = 1; i < tr.length; i++) {
+                let textValue = tr[i].textContent || tr[i].innerText;
+                if (textValue.toUpperCase().indexOf(input) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    </script>
+</body>
+</html>

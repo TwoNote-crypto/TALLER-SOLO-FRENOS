@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Solo Frenos</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <%- include('partials/sidebar', { page: 'dashboard' }) %>
+
+    <div class="main-content">
+        <%- include('partials/topbar', { pageTitle: 'Inicio' }) %>
+
+        <div class="dashboard-content">
+            <div class="cards-grid">
+                <div class="stat-card">
+                    <h3>Ventas del Día</h3>
+                    <div class="value">$<%= metrics.ventasHoy.toLocaleString('es-CO') %></div>
+                </div>
+                <div class="stat-card">
+                    <h3>Tickets Generados</h3>
+                    <div class="value"><%= metrics.ticketsGenerados %></div>
+                </div>
+                <div class="stat-card">
+                    <h3>Stock Bajo</h3>
+                    <div class="value text-red"><%= metrics.stockBajo %></div>
+                </div>
+                <div class="stat-card">
+                    <h3>Clientes Atendidos</h3>
+                    <div class="value text-green"><%= metrics.clientesAtendidos %></div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div style="padding: 20px; border-bottom: 1px solid var(--border-color);">
+                    <h3>Últimos Tickets</h3>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ticket ID</th>
+                            <th>Fecha</th>
+                            <th>Cliente</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if(recientes && recientes.length > 0) { %>
+                            <% recientes.forEach(t => { %>
+                                <tr>
+                                    <td><a href="/ticket/<%= t.id %>" style="color: var(--primary-red); font-weight: bold;">#<%= t.id.toString().padStart(5, '0') %></a></td>
+                                    <td><%= new Date(t.fecha).toLocaleString() %></td>
+                                    <td><%= t.cliente || 'Consumidor Final' %></td>
+                                    <td class="text-green">$<%= t.total.toLocaleString('es-CO') %></td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr><td colspan="4" style="text-align: center;">No hay tickets recientes</td></tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

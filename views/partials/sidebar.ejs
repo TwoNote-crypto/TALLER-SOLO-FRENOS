@@ -1,0 +1,37 @@
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h2>Taller Solo Frenos</h2>
+        <p>Panel Administrativo</p>
+    </div>
+    
+    <div class="sidebar-menu">
+        <a href="/dashboard" class="<%= typeof page !== 'undefined' && page === 'dashboard' ? 'active' : '' %>">
+            <i>📊</i> Inicio
+        </a>
+        <a href="/inventory" class="<%= typeof page !== 'undefined' && page === 'inventory' ? 'active' : '' %>">
+            <i>📦</i> Inventario
+        </a>
+        <a href="/pos" class="<%= typeof page !== 'undefined' && page === 'pos' ? 'active' : '' %>">
+            <i>🧾</i> Ventas / Tickets
+        </a>
+        <a href="/clientes" class="<%= typeof page !== 'undefined' && page === 'clientes' ? 'active' : '' %>">
+            <i>👥</i> Clientes
+        </a>
+        <a href="/pos" class="btn-new-ticket">
+            + Nuevo Ticket
+        </a>
+    </div>
+
+    <div class="sidebar-footer">
+        <% if (locals.user) { %>
+            <div class="user-info">
+                <div class="user-avatar">👤</div>
+                <div class="user-details">
+                    <h4><%= locals.user.nombre %></h4>
+                    <p>Sesión activa</p>
+                </div>
+            </div>
+            <a href="/logout" class="logout-link">↪ Cerrar Sesión</a>
+        <% } %>
+    </div>
+</div>

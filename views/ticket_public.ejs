@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket #SF-<%= ticket.id.toString().padStart(4, '0') %> - Solo Frenos</title>
+    <style>
+        body { margin: 0; font-family: 'Inter', sans-serif; background: #121212; color: #f5f5f5; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .ticket-card { background: #1a1a1a; border-radius: 12px; border: 1px solid #333; width: 100%; max-width: 400px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .ticket-header-top { border-top: 4px solid #e53935; padding: 20px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .ticket-logo img { height: 60px; max-width: 200px; object-fit: contain; }
+        .ticket-info { text-align: center; font-size: 0.85rem; color: #888; line-height: 1.6; margin-top: 15px; width: 100%; }
+        .ticket-title { font-size: 1.1rem; color: white; font-weight: bold; margin-bottom: 5px; }
+        
+        .ticket-body { padding: 15px 20px; }
+        .info-grid { display: flex; flex-direction: column; gap: 10px; padding: 15px 0; border-bottom: 1px solid #333; border-top: 1px solid #333; margin-bottom: 15px; }
+        .info-col label { display: block; font-size: 0.75rem; color: #666; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 1px; }
+        .info-col .val { font-size: 0.95rem; font-weight: bold; color: white; }
+        .info-col .sub-val { font-size: 0.8rem; color: #888; }
+        
+        .items-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .items-table th { text-align: left; padding: 8px 0; font-size: 0.75rem; color: #666; text-transform: uppercase; border-bottom: 1px solid #333; }
+        .items-table td { padding: 10px 0; border-bottom: 1px solid #222; font-size: 0.9rem; }
+        .items-table .desc-col { font-weight: bold; color: white; }
+        .items-table .sub-desc { font-size: 0.75rem; color: #888; font-weight: normal; display: block; margin-top: 2px; }
+        
+        .totals-section { display: flex; flex-direction: column; align-items: flex-end; }
+        .totals-box { width: 100%; max-width: 200px; }
+        .t-row { display: flex; justify-content: space-between; padding: 5px 0; color: #888; font-size: 0.9rem; }
+        .t-row.grand { font-size: 1.3rem; font-weight: bold; color: white; border-top: 1px solid #333; padding-top: 10px; margin-top: 5px; }
+        .t-row.grand .val { color: #e53935; }
+        
+        .ticket-footer { padding: 20px; text-align: center; background: #151515; border-top: 1px dashed #333; }
+        .warranty-box { background: #111; border: 1px dashed #444; padding: 10px; border-radius: 8px; font-size: 0.75rem; color: #888; margin-bottom: 15px; }
+        
+        .download-btn {
+            background: #e53935;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            margin-top: 20px;
+            cursor: pointer;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 15px rgba(229, 57, 53, 0.4);
+            transition: background 0.3s;
+        }
+        .download-btn:hover {
+            background: #d32f2f;
+        }
+
+        /* Ocultar botón al generar PDF */
+        .pdf-mode .download-btn { display: none !important; }
+        .pdf-mode { background: white !important; color: black !important; padding: 0 !important; }
+        .pdf-mode .ticket-card { background: white !important; border: none !important; box-shadow: none !important; max-width: none !important; width: 100% !important; border-radius: 0 !important; color: black !important; }
+        .pdf-mode .ticket-title, .pdf-mode .info-col .val, .pdf-mode .items-table .desc-col, .pdf-mode .t-row.grand { color: black !important; }
+        .pdf-mode .ticket-info, .pdf-mode .info-col label, .pdf-mode .info-col .sub-val, .pdf-mode .items-table th, .pdf-mode .items-table .sub-desc, .pdf-mode .t-row { color: #333 !important; }
+        .pdf-mode .items-table th, .pdf-mode .items-table td, .pdf-mode .info-grid { border-color: #ccc !important; }
+        .pdf-mode .ticket-footer { background: transparent !important; border-top: 1px dashed black !important; }
+        .pdf-mode .warranty-box { background: transparent !important; border: 1px dashed black !important; color: black !important; }
+        .pdf-mode .t-row.grand .val { color: black !important; }
+    </style>
+</head>
+<body>
+
+    <button id="downloadBtn" class="download-btn">📥 Descargar Factura en PDF</button>
+
+    <div id="ticketContent" style="margin-top: 20px; width: 100%; display: flex; justify-content: center;">
+        <div class="ticket-card">
+            <div class="ticket-header-top">
+                <div class="ticket-logo">
+                    <img src="/img/Logo.png" alt="Solo Frenos Logo">
+                </div>
+                <div style="font-size:0.8rem; color:#888; margin-top:10px; line-height:1.6;">
+                    Expertos en Seguridad Automotriz<br>
+                    Av. Principal Industrial #402<br>
+                    Tel: (555) 123-4567
+                </div>
+                <div class="ticket-info">
+                    <div class="ticket-title">RECIBO DE VENTA</div>
+                    <% const d = new Date(ticket.fecha); %>
+                    Fecha: <strong><%= d.toLocaleDateString() %></strong><br>
+                    Hora: <strong><%= d.toLocaleTimeString() %></strong><br>
+                    Folio: <strong>#SF-<%= d.getFullYear() %>-<%= ticket.id.toString().padStart(4, '0') %></strong><br>
+                    <div style="margin-top: 5px; color: #e53935;">
+                        Atendido por: <strong><%= ticket.vendedor %></strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ticket-body">
+                <div class="info-grid">
+                    <div class="info-col">
+                        <label>Cliente</label>
+                        <div class="val"><%= ticket.cliente_nombre %></div>
+                        <div class="sub-val"><%= ticket.telefono ? 'Tel: ' + ticket.telefono : '' %></div>
+                        <div class="sub-val"><%= ticket.cedula ? 'C.C: ' + ticket.cedula : '' %></div>
+                    </div>
+                </div>
+
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th>Descripción</th>
+                            <th style="text-align:center;">Cant.</th>
+                            <th style="text-align:right;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% let subtotal_sum = 0; %>
+                        <% detalles.forEach(d => { %>
+                            <% let row_sub = d.cantidad * d.precio; subtotal_sum += row_sub; %>
+                            <tr>
+                                <td class="desc-col">
+                                    <%= d.producto_nombre %>
+                                </td>
+                                <td style="text-align:center;"><%= d.cantidad %></td>
+                                <td style="text-align:right; font-weight:bold;">$<%= row_sub.toLocaleString('es-CO') %></td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+
+                <div class="totals-section">
+                    <div class="totals-box">
+                        <div class="t-row">
+                            <span>Subtotal</span>
+                            <span>$<%= subtotal_sum.toLocaleString('es-CO') %></span>
+                        </div>
+                        <div class="t-row">
+                            <span>IVA (16%)</span>
+                            <span>$<%= (subtotal_sum * 0.16).toLocaleString('es-CO') %></span>
+                        </div>
+                        <div class="t-row grand">
+                            <span>TOTAL</span>
+                            <span class="val">$<%= ticket.total.toLocaleString('es-CO') %></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ticket-footer">
+                <div class="warranty-box">
+                    ** Garantía de 6 meses o 10,000 km en balatas por defectos de fabricación. La seguridad es nuestra prioridad. **
+                </div>
+                <div style="font-size:0.7rem; color:#666; letter-spacing:2px; text-transform:uppercase;">
+                    SF-<%= ticket.id %>-<%= ticket.cliente_nombre.substring(0,3) %>-POS
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Librería para generar PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            var element = document.getElementById('ticketContent');
+            var btn = document.getElementById('downloadBtn');
+            
+            // Cambiar estilos para PDF
+            document.body.classList.add('pdf-mode');
+            btn.style.display = 'none';
+
+            var opt = {
+                margin:       10,
+                filename:     'Factura_SF-<%= ticket.id %>.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a5', orientation: 'portrait' }
+            };
+
+            // Generar PDF y luego restaurar estilos
+            html2pdf().set(opt).from(element).save().then(function() {
+                document.body.classList.remove('pdf-mode');
+                btn.style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>

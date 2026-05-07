@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body {
+            background-color: var(--bg-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+        .error-container {
+            max-width: 500px;
+        }
+        .error-code {
+            font-size: 6rem;
+            color: var(--primary-red);
+            font-weight: bold;
+            line-height: 1;
+        }
+        .error-message {
+            font-size: 1.5rem;
+            margin: 20px 0;
+            color: var(--text-main);
+        }
+        .btn-home {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: var(--primary-red);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        .btn-home:hover {
+            background-color: var(--primary-red-hover);
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-code">404</div>
+        <div class="error-message">Página no encontrada</div>
+        <p style="color: var(--text-muted);">Lo sentimos, la página que estás buscando no existe o ha sido movida.</p>
+        <a href="/" class="btn-home">Volver al Inicio</a>
+    </div>
+</body>
+</html>
