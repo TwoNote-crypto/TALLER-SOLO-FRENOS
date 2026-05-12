@@ -60,7 +60,7 @@ router.get('/clientes/buscar/:cedula', async (req, res) => {
 
         const { cedula } = req.params;
 
-        const [rows] = await db.execute(
+        const [rows] = await db.query(
             'SELECT * FROM clientes WHERE cedula = ?',
             [cedula]
         );
@@ -106,7 +106,7 @@ router.post('/clientes/edit/:id', async (req, res) => {
             telefono
         } = req.body;
 
-        await db.execute(`
+        await db.query(`
             UPDATE clientes
             SET nombre = ?, cedula = ?, telefono = ?
             WHERE id = ?
@@ -142,7 +142,7 @@ router.delete('/clientes/:id', async (req, res) => {
 
         const { id } = req.params;
 
-        await db.execute(
+        await db.query(
             'DELETE FROM clientes WHERE id = ?',
             [id]
         );
@@ -188,7 +188,7 @@ router.post('/productos', upload.single('imagen'), async (req, res) => {
         const prc = parseFloat(precio) || 0;
         const min_stock = parseInt(stock_minimo) || 10;
 
-        await db.execute(`
+        await db.query(`
             INSERT INTO productos
             (
                 nombre,
@@ -252,7 +252,7 @@ router.post('/productos/edit/:id', upload.single('imagen'), async (req, res) => 
                 '/img/productos/' +
                 req.file.filename;
 
-            await db.execute(`
+            await db.query(`
                 UPDATE productos
                 SET
                     nombre = ?,
@@ -275,7 +275,7 @@ router.post('/productos/edit/:id', upload.single('imagen'), async (req, res) => 
         } else {
 
             // SIN IMAGEN
-            await db.execute(`
+            await db.query(`
                 UPDATE productos
                 SET
                     nombre = ?,
@@ -323,7 +323,7 @@ router.delete('/productos/:id', async (req, res) => {
         // ELIMINAR ALERTAS
         // ======================================
 
-        await db.execute(`
+        await db.query(`
             DELETE FROM alertastock
             WHERE producto_id = ?
         `, [id]);
@@ -332,7 +332,7 @@ router.delete('/productos/:id', async (req, res) => {
         // ELIMINAR MOVIMIENTOS
         // ======================================
 
-        await db.execute(`
+        await db.query(`
             DELETE FROM movimientos
             WHERE producto_id = ?
         `, [id]);
@@ -341,7 +341,7 @@ router.delete('/productos/:id', async (req, res) => {
         // ELIMINAR DETALLES DE VENTA
         // ======================================
 
-        await db.execute(`
+        await db.query(`
             DELETE FROM ticket_detalle
             WHERE producto_id = ?
         `, [id]);
@@ -350,7 +350,7 @@ router.delete('/productos/:id', async (req, res) => {
         // ELIMINAR PRODUCTO
         // ======================================
 
-        await db.execute(`
+        await db.query(`
             DELETE FROM productos
             WHERE id = ?
         `, [id]);
@@ -412,7 +412,7 @@ router.post('/ventas', async (req, res) => {
 
         if (cliente.isNew) {
 
-            const [result] = await db.execute(`
+            const [result] = await db.query(`
                 INSERT INTO clientes
                 (
                     cedula,
@@ -439,7 +439,7 @@ router.post('/ventas', async (req, res) => {
         // CREAR TICKET
         // ======================================
 
-        const [ticketResult] = await db.execute(`
+        const [ticketResult] = await db.query(`
             INSERT INTO tickets
             (
                 total,
@@ -463,7 +463,7 @@ router.post('/ventas', async (req, res) => {
         for (const item of carrito) {
 
             // INSERTAR DETALLE
-            await db.execute(`
+            await db.query(`
                 INSERT INTO ticket_detalle
                 (
                     ticket_id,
@@ -482,7 +482,7 @@ router.post('/ventas', async (req, res) => {
             ]);
 
             // DESCONTAR STOCK
-            await db.execute(`
+            await db.query(`
                 UPDATE productos
                 SET cantidad = cantidad - ?
                 WHERE id = ?
@@ -492,7 +492,7 @@ router.post('/ventas', async (req, res) => {
             ]);
 
             // OBTENER PRODUCTO ACTUAL
-            const [productoActual] = await db.execute(`
+            const [productoActual] = await db.query(`
                 SELECT
                     nombre,
                     cantidad,
@@ -513,7 +513,7 @@ router.post('/ventas', async (req, res) => {
             ) {
 
                 // VALIDAR ALERTA EXISTENTE
-                const [alertaExistente] = await db.execute(`
+                const [alertaExistente] = await db.query(`
                     SELECT id
                     FROM alertastock
                     WHERE producto_id = ?
@@ -527,7 +527,7 @@ router.post('/ventas', async (req, res) => {
                     alertaExistente.length === 0
                 ) {
 
-                    await db.execute(`
+                    await db.query(`
                         INSERT INTO alertastock
                         (
                             producto_id,
@@ -542,7 +542,7 @@ router.post('/ventas', async (req, res) => {
             }
 
             // REGISTRAR MOVIMIENTO
-            await db.execute(`
+            await db.query(`
                 INSERT INTO movimientos
                 (
                     producto_id,

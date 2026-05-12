@@ -5,7 +5,7 @@ const getPOS = async (req, res) => {
     try {
 
         // PRODUCTOS DISPONIBLES
-        const [productos] = await db.execute(`
+        const [productos] = await db.query(`
             SELECT * FROM productos
             WHERE cantidad > 0
         `);
@@ -34,7 +34,7 @@ const getTicketView = async (req, res) => {
         const ticketId = req.params.id;
 
         // TICKET
-        const [tickets] = await db.execute(`
+        const [tickets] = await db.query(`
             SELECT 
                 t.*,
                 c.nombre AS cliente_nombre,
@@ -60,7 +60,7 @@ const getTicketView = async (req, res) => {
         }
 
         // DETALLE
-        const [detalles] = await db.execute(`
+        const [detalles] = await db.query(`
             SELECT 
                 d.*,
                 p.nombre AS producto_nombre
@@ -96,7 +96,7 @@ const getPublicTicket = async (req, res) => {
         const ticketId = req.params.id;
 
         // TICKET
-        const [tickets] = await db.execute(`
+        const [tickets] = await db.query(`
             SELECT 
                 t.*,
                 c.nombre AS cliente_nombre,
@@ -122,7 +122,7 @@ const getPublicTicket = async (req, res) => {
         }
 
         // DETALLES
-        const [detalles] = await db.execute(`
+        const [detalles] = await db.query(`
             SELECT 
                 d.*,
                 p.nombre AS producto_nombre

@@ -5,7 +5,7 @@ const getInventory = async (req, res) => {
     try {
 
         // OBTENER PRODUCTOS
-        const [productos] = await db.execute(`
+        const [productos] = await db.query(`
             SELECT * FROM productos
         `);
 

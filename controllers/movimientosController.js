@@ -4,7 +4,7 @@ const getMovimientos = async (req, res) => {
 
     try {
 
-        const [movimientos] = await db.execute(`
+        const [movimientos] = await db.query(`
             SELECT
                 m.id,
                 p.nombre AS producto,

@@ -8,7 +8,7 @@ const getReportes = async (req, res) => {
         // TOTAL VENTAS
         // ======================================
 
-        const [ventas] = await db.execute(`
+        const [ventas] = await db.query(`
             SELECT
                 COUNT(*) AS total_tickets,
                 SUM(total) AS total_ventas
@@ -19,7 +19,7 @@ const getReportes = async (req, res) => {
         // PRODUCTOS MÁS VENDIDOS
         // ======================================
 
-        const [productosVendidos] = await db.execute(`
+        const [productosVendidos] = await db.query(`
             SELECT
                 p.nombre,
                 SUM(td.cantidad) AS total_vendido
@@ -35,7 +35,7 @@ const getReportes = async (req, res) => {
         // STOCK BAJO
         // ======================================
 
-        const [stockBajo] = await db.execute(`
+        const [stockBajo] = await db.query(`
             SELECT
                 nombre,
                 cantidad,
@@ -49,7 +49,7 @@ const getReportes = async (req, res) => {
         // MOVIMIENTOS RECIENTES
         // ======================================
 
-        const [movimientos] = await db.execute(`
+        const [movimientos] = await db.query(`
             SELECT
                 m.tipo_movimiento,
                 m.cantidad,
@@ -69,7 +69,7 @@ const getReportes = async (req, res) => {
         // ALERTAS ACTIVAS
         // ======================================
 
-        const [alertas] = await db.execute(`
+        const [alertas] = await db.query(`
             SELECT
                 a.mensaje,
                 a.fecha,

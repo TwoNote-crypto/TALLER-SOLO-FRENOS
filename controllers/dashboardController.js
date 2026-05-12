@@ -5,7 +5,7 @@ const getDashboard = async (req, res) => {
     try {
 
         // VENTAS Y TICKETS
-        const [ventas] = await db.execute(`
+        const [ventas] = await db.query(`
             SELECT 
                 SUM(total) AS ventasHoy,
                 COUNT(*) AS ticketsGenerados
@@ -13,20 +13,20 @@ const getDashboard = async (req, res) => {
         `);
 
         // STOCK BAJO
-        const [stock] = await db.execute(`
+        const [stock] = await db.query(`
             SELECT COUNT(*) AS stockBajo
             FROM productos
             WHERE cantidad <= 10
         `);
 
         // CLIENTES
-        const [clientes] = await db.execute(`
+        const [clientes] = await db.query(`
             SELECT COUNT(DISTINCT cliente_id) AS clientesAtendidos
             FROM tickets
         `);
 
         // TICKETS RECIENTES
-        const [recientes] = await db.execute(`
+        const [recientes] = await db.query(`
             SELECT 
                 t.id,
                 t.fecha,

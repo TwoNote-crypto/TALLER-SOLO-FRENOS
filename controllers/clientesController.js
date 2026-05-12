@@ -5,7 +5,7 @@ const getClientes = async (req, res) => {
     try {
 
         // OBTENER CLIENTES
-        const [clientes] = await db.execute(`
+        const [clientes] = await db.query(`
             SELECT * FROM clientes
             ORDER BY id DESC
         `);

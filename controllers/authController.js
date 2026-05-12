@@ -17,7 +17,7 @@ const login = async (req, res) => {
         );
 
         // CONSULTA MYSQL
-        const [results] = await db.execute(
+        const [results] = await db.query(
             'SELECT * FROM usuarios WHERE usuario = ?',
             [usuario]
         );
@@ -72,14 +72,18 @@ const login = async (req, res) => {
 
 const logout = (req, res) => {
 
-    req.session.destroy(() => {
+    if (req.session) {
+        req.session.destroy(() => {
+            res.redirect('/login');
+        });
+    } else {
         res.redirect('/login');
-    });
+    }
 };
 
 const checkAuth = (req, res, next) => {
 
-    if (req.session.user) {
+    if (req.session && req.session.user) {
 
         next();
 
