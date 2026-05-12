@@ -18,6 +18,12 @@
         .fill-orange { background: var(--warning); }
         .fill-orange { background: var(--warning); }
         
+        /* Filter buttons ERP style */
+        .filters { display: flex; gap: 8px; }
+        .filter-btn { padding: 8px 16px; background: #2c2c2c; border: 1px solid #444; border-radius: 20px; color: white; cursor: pointer; white-space: nowrap; transition: 0.2s; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+        .filter-btn:hover { background: #333; }
+        .filter-btn.active { background: var(--primary-red); border-color: var(--primary-red); color: white; }
+
         /* Modal Styles */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; }
         .modal.active { display: flex; }
@@ -60,12 +66,22 @@
             </div>
 
             <div class="table-container">
-                <div style="padding: 15px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <input type="text" id="searchInput" placeholder="🔍 Buscar producto..." class="form-control" style="width:200px; display:inline-block; margin-right:10px;" onkeyup="filterTable('inventoryTable')">
-                        <button class="btn" style="background:#333; color:white;" onclick="exportTableToCSV('inventoryTable', 'inventario.csv')">📥 Exportar CSV</button>
+                <div style="padding: 15px 20px; border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                        <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                            <input type="text" id="searchInput" placeholder="🔍 Buscar producto..." class="form-control" style="width:250px;" onkeyup="applyFilters()">
+                            <div class="filters">
+                                <button class="filter-btn active" onclick="filterByStock('todos', this)">Todos</button>
+                                <button class="filter-btn" onclick="filterByStock('normal', this)"><span style="color:var(--success, #4caf50)">●</span> Stock Normal</button>
+                                <button class="filter-btn" onclick="filterByStock('bajo', this)"><span style="color:var(--warning, #ff9800)">●</span> Stock Bajo</button>
+                                <button class="filter-btn" onclick="filterByStock('sin_stock', this)"><span style="color:var(--primary-red, #f44336)">●</span> Sin Stock</button>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn" style="background:#333; color:white;" onclick="exportTableToCSV('inventoryTable', 'inventario.csv')">📥 Exportar CSV</button>
+                            <button class="btn btn-primary" onclick="document.getElementById('addModal').classList.add('active')">+ Agregar Producto</button>
+                        </div>
                     </div>
-                    <button class="btn btn-primary" onclick="document.getElementById('addModal').classList.add('active')">+ Agregar Producto</button>
                 </div>
                 <table id="inventoryTable">
                     <thead>
@@ -79,7 +95,7 @@
                     </thead>
                     <tbody>
                         <% productos.forEach(p => { %>
-                            <tr>
+                            <tr data-cantidad="<%= p.cantidad %>" data-minimo="<%= p.stock_minimo %>">
                                 <td>
                                     <% if (p.imagen) { %>
                                         <img src="<%= p.imagen %>" class="prod-img-thumb" alt="<%= p.nombre %>">
@@ -90,7 +106,8 @@
                                 </td>
                                 <td><span class="badge bg-gray"><%= p.categoria %></span></td>
                                 <td>
-                                    <%= p.cantidad %>
+                                    <% if(p.cantidad === 0) { %><span style="color:var(--primary-red, #f44336); margin-right:5px; font-size:1.2rem; vertical-align:middle;">●</span><% } else if(p.cantidad <= p.stock_minimo) { %><span style="color:var(--warning, #ff9800); margin-right:5px; font-size:1.2rem; vertical-align:middle;">●</span><% } else { %><span style="color:var(--success, #4caf50); margin-right:5px; font-size:1.2rem; vertical-align:middle;">●</span><% } %>
+                                    <span style="font-weight:bold; vertical-align:middle;"><%= p.cantidad %></span>
                                     <div class="status-bar-container">
                                         <% let color = p.cantidad > (p.stock_minimo * 2) ? 'fill-green' : (p.cantidad > p.stock_minimo ? 'fill-orange' : 'fill-red'); %>
                                         <% let percent = Math.min((p.cantidad / (p.stock_minimo * 3)) * 100, 100); %>
@@ -128,11 +145,17 @@
                     <div class="form-group">
                         <label>Categoría</label>
                         <select name="categoria" class="form-control" required>
-                            <option value="Pastillas">Pastillas</option>
-                            <option value="Discos">Discos</option>
-                            <option value="Líquidos">Líquidos</option>
-                            <option value="Reparación">Reparación</option>
-                            <option value="Otro">Otro</option>
+                            <option value="Frenos">Frenos</option>
+                            <option value="Suspensión">Suspensión</option>
+                            <option value="Motor">Motor</option>
+                            <option value="Lubricantes">Lubricantes</option>
+                            <option value="Filtros">Filtros</option>
+                            <option value="Eléctrico">Eléctrico</option>
+                            <option value="Dirección">Dirección</option>
+                            <option value="Llantas">Llantas</option>
+                            <option value="Aire">Aire</option>
+                            <option value="Refrigeración">Refrigeración</option>
+                            <option value="Transmisión">Transmisión</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -179,11 +202,17 @@
                     <div class="form-group">
                         <label>Categoría</label>
                         <select id="edit_categoria" name="categoria" class="form-control" required>
-                            <option value="Pastillas">Pastillas</option>
-                            <option value="Discos">Discos</option>
-                            <option value="Líquidos">Líquidos</option>
-                            <option value="Reparación">Reparación</option>
-                            <option value="Otro">Otro</option>
+                            <option value="Frenos">Frenos</option>
+                            <option value="Suspensión">Suspensión</option>
+                            <option value="Motor">Motor</option>
+                            <option value="Lubricantes">Lubricantes</option>
+                            <option value="Filtros">Filtros</option>
+                            <option value="Eléctrico">Eléctrico</option>
+                            <option value="Dirección">Dirección</option>
+                            <option value="Llantas">Llantas</option>
+                            <option value="Aire">Aire</option>
+                            <option value="Refrigeración">Refrigeración</option>
+                            <option value="Transmisión">Transmisión</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -240,20 +269,66 @@
             }
         }
 
-        // Filtro de tabla
-        function filterTable(tableId) {
-            const input = document.getElementById("searchInput").value.toUpperCase();
-            const table = document.getElementById(tableId);
-            const tr = table.getElementsByTagName("tr");
+        // Filtros combinados (Texto y Stock)
+        let currentStockFilter = 'todos';
+
+        function filterByStock(type, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentStockFilter = type;
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const input = document.getElementById("searchInput") ? document.getElementById("searchInput").value.toUpperCase() : "";
+            const table = document.getElementById("inventoryTable");
+            if (!table) return;
+            const rows = table.rows;
             
-            for (let i = 1; i < tr.length; i++) {
-                let textValue = tr[i].textContent || tr[i].innerText;
-                if (textValue.toUpperCase().indexOf(input) > -1) {
-                    tr[i].style.display = "";
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                // Filtro de texto
+                let textValue = row.textContent || row.innerText;
+                let matchesText = textValue.toUpperCase().indexOf(input) > -1;
+                
+                // Filtro de stock
+                let cantAttr = row.getAttribute("data-cantidad");
+                let minAttr = row.getAttribute("data-minimo");
+                
+                // Si la fila no es un producto (no tiene data-cantidad), se ignora en filtros de stock
+                if (cantAttr === null || cantAttr === undefined) {
+                    row.style.display = (currentStockFilter === 'todos' && matchesText) ? "" : "none";
+                    continue;
+                }
+                
+                let cantidad = Number(cantAttr);
+                if (isNaN(cantidad)) cantidad = 0;
+                
+                let minimo = Number(minAttr);
+                if (isNaN(minimo)) minimo = 10; // Valor por defecto si falta
+                
+                let matchesStock = false;
+                
+                if (currentStockFilter === 'todos') {
+                    matchesStock = true;
+                } else if (currentStockFilter === 'sin_stock') {
+                    matchesStock = (cantidad <= 0);
+                } else if (currentStockFilter === 'bajo') {
+                    matchesStock = (cantidad > 0 && cantidad <= minimo);
+                } else if (currentStockFilter === 'normal') {
+                    matchesStock = (cantidad > minimo);
+                }
+                
+                if (matchesText && matchesStock) {
+                    row.style.display = "";
                 } else {
-                    tr[i].style.display = "none";
+                    row.style.display = "none";
                 }
             }
+        }
+        
+        function filterTable(tableId) {
+            applyFilters();
         }
 
         // Exportar a CSV

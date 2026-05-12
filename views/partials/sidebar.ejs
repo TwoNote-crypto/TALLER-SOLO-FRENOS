@@ -1,37 +1,100 @@
 <div class="sidebar">
+
     <div class="sidebar-header">
-        <h2>Taller Solo Frenos</h2>
-        <p>Panel Administrativo</p>
+
+        <h2>
+            Taller Solo Frenos
+        </h2>
+
+        <p>
+            Panel Administrativo
+        </p>
+
     </div>
-    
+
+
     <div class="sidebar-menu">
+
+        <!-- DASHBOARD -->
         <a href="/dashboard" class="<%= typeof page !== 'undefined' && page === 'dashboard' ? 'active' : '' %>">
-            <i>📊</i> Inicio
+            <i>📊</i>
+            Inicio
         </a>
+
+
+        <!-- INVENTARIO -->
         <a href="/inventory" class="<%= typeof page !== 'undefined' && page === 'inventory' ? 'active' : '' %>">
-            <i>📦</i> Inventario
+            <i>📦</i>
+            Inventario
         </a>
+
+
+        <!-- POS -->
         <a href="/pos" class="<%= typeof page !== 'undefined' && page === 'pos' ? 'active' : '' %>">
-            <i>🧾</i> Ventas / Tickets
+            <i>🧾</i>
+            Ventas / Tickets
         </a>
+
+
+        <!-- CLIENTES -->
         <a href="/clientes" class="<%= typeof page !== 'undefined' && page === 'clientes' ? 'active' : '' %>">
-            <i>👥</i> Clientes
+            <i>👥</i>
+            Clientes
         </a>
+
+
+        <!-- MOVIMIENTOS -->
+        <a href="/movimientos" class="<%= typeof page !== 'undefined' && page === 'movimientos' ? 'active' : '' %>">
+            <i>📋</i>
+            Movimientos
+        </a>
+
+
+        <!-- REPORTES -->
+        <a href="/reportes" class="<%= typeof page !== 'undefined' && page === 'reportes' ? 'active' : '' %>">
+            <i>📈</i>
+            Reportes
+        </a>
+
+
+        <!-- NUEVO TICKET -->
         <a href="/pos" class="btn-new-ticket">
             + Nuevo Ticket
         </a>
+
     </div>
 
+
     <div class="sidebar-footer">
+
         <% if (locals.user) { %>
+
             <div class="user-info">
-                <div class="user-avatar">👤</div>
-                <div class="user-details">
-                    <h4><%= locals.user.nombre %></h4>
-                    <p>Sesión activa</p>
+
+                <div class="user-avatar">
+                    👤
                 </div>
+
+                <div class="user-details">
+
+                    <h4>
+                        <%= locals.user.nombre %>
+                    </h4>
+
+                    <p>
+                        Sesión activa
+                    </p>
+
+                </div>
+
             </div>
-            <a href="/logout" class="logout-link">↪ Cerrar Sesión</a>
-        <% } %>
+
+            <a href="/logout" class="logout-link">
+                ↪ Cerrar Sesión
+            </a>
+
+            <% } %>
+
     </div>
+
 </div>

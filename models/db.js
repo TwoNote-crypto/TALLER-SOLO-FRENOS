@@ -1,13 +1,15 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
+const mysql = require('mysql2/promise');
 
-const dbPath = path.resolve(__dirname, '../database.sqlite');
-const db = new sqlite3.Database(dbPath, (err) => {
-    if (err) {
-        console.error('Error al abrir la base de datos', err.message);
-    } else {
-        console.log('Conectado a la base de datos SQLite.');
-    }
+const pool = mysql.createPool({
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'taller_solo_frenos',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
 
-module.exports = db;
+console.log('Conectado a MySQL correctamente.');
+
+module.exports = pool;

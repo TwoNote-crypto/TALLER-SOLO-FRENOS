@@ -1,195 +1,435 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Vista de Ticket - Solo Frenos</title>
-    <link rel="stylesheet" href="/css/style.css">
-    <style>
-        .ticket-wrapper { display: flex; justify-content: center; padding: 40px; }
-        .ticket-card { background: #1a1a1a; border-radius: 12px; border: 1px solid #333; width: 100%; max-width: 600px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .ticket-header-top { border-top: 4px solid var(--primary-red); padding: 30px 40px 10px; display: flex; justify-content: space-between; }
-        .ticket-logo { font-size: 1.5rem; font-weight: bold; color: white; display: flex; align-items: center; gap: 10px; }
-        .ticket-info { text-align: right; font-size: 0.85rem; color: #888; line-height: 1.6; }
-        .ticket-title { font-size: 1.1rem; color: white; font-weight: bold; margin-bottom: 5px; }
-        
-        .ticket-body { padding: 20px 40px; }
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 20px 0; border-bottom: 1px solid #333; border-top: 1px solid #333; margin-bottom: 20px; }
-        .info-col label { display: block; font-size: 0.75rem; color: #666; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 1px; }
-        .info-col .val { font-size: 0.95rem; font-weight: bold; color: white; }
-        .info-col .sub-val { font-size: 0.8rem; color: #888; }
-        
-        .items-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-        .items-table th { text-align: left; padding: 10px 0; font-size: 0.75rem; color: #666; text-transform: uppercase; border-bottom: 1px solid #333; }
-        .items-table td { padding: 15px 0; border-bottom: 1px solid #222; font-size: 0.9rem; }
-        .items-table .desc-col { font-weight: bold; color: white; }
-        .items-table .sub-desc { font-size: 0.75rem; color: #888; font-weight: normal; display: block; margin-top: 4px; }
-        
-        .totals-section { display: flex; justify-content: flex-end; }
-        .totals-box { width: 250px; }
-        .t-row { display: flex; justify-content: space-between; padding: 8px 0; color: #888; font-size: 0.9rem; }
-        .t-row.grand { font-size: 1.5rem; font-weight: bold; color: white; border-top: 1px solid #333; padding-top: 15px; margin-top: 5px; }
-        .t-row.grand .val { color: var(--primary-red); }
-        
-        .ticket-footer { padding: 30px 40px; text-align: center; background: #151515; border-top: 1px dashed #333; }
-        .warranty-box { background: #111; border: 1px dashed #444; padding: 15px; border-radius: 8px; font-size: 0.8rem; color: #888; margin-bottom: 20px; }
-        
-        .action-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; background: #111; border-bottom: 1px solid #222; }
-        .btn-outline { background: transparent; border: 1px solid #444; color: white; padding: 8px 15px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
-        .btn-outline:hover { background: #222; }
 
-        /* Estilos específicos para Impresión */
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Ticket #<%= ticket.id %>
+    </title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background: #f5f5f5;
+            padding: 40px;
+            color: #222;
+        }
+
+        .ticket-container {
+            width: 850px;
+            margin: auto;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 25px rgba(0, 0, 0, .12);
+        }
+
+        .ticket-header {
+            background: #111;
+            color: #fff;
+            padding: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ticket-header h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .ticket-header p {
+            opacity: .8;
+        }
+
+        .ticket-info {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .info-box h3 {
+            margin-bottom: 15px;
+            color: #e53935;
+        }
+
+        .info-box p {
+            margin-bottom: 8px;
+            color: #444;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #111;
+            color: #fff;
+        }
+
+        th {
+            padding: 16px;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        td {
+            padding: 18px 16px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tbody tr:hover {
+            background: #fafafa;
+        }
+
+        .desc-col {
+            font-weight: 600;
+        }
+
+        .sub-desc {
+            display: block;
+            margin-top: 4px;
+            font-size: 12px;
+            color: #888;
+            font-weight: normal;
+        }
+
+        .totals-section {
+            display: flex;
+            justify-content: flex-end;
+            padding: 35px;
+        }
+
+        .totals-box {
+            width: 320px;
+        }
+
+        .t-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .grand {
+            margin-top: 15px;
+            padding-top: 18px;
+            border-top: 2px solid #222;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .grand .val {
+            color: #000;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 25px;
+            background: #fafafa;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            color: #fff;
+        }
+
+        .btn-print {
+            background: #111;
+        }
+
+        .btn-back {
+            background: #e53935;
+        }
+
         @media print {
-            body { background: white !important; color: black !important; }
-            .sidebar, .action-bar { display: none !important; }
-            .main-content { margin-left: 0 !important; width: 100% !important; padding: 0 !important; }
-            .ticket-wrapper { padding: 0 !important; }
-            .ticket-card { 
-                background: white !important; 
-                box-shadow: none !important; 
-                border: none !important; 
-                max-width: 100% !important; 
-                color: black !important;
-                border-radius: 0 !important;
+
+            body {
+                background: #fff;
+                padding: 0;
             }
-            /* Forzar textos a negro/gris oscuro para impresión */
-            .ticket-logo, .ticket-title, .info-col .val, .items-table .desc-col, .t-row.grand { color: black !important; }
-            .ticket-info, .info-col label, .info-col .sub-val, .items-table th, .items-table .sub-desc, .t-row { color: #333 !important; }
-            .items-table th, .items-table td, .info-grid { border-color: #ccc !important; }
-            .ticket-footer { background: transparent !important; border-top: 1px dashed black !important; }
-            .warranty-box { background: transparent !important; border: 1px dashed black !important; color: black !important; }
-            .t-row.grand .val { color: black !important; }
-            
-            @page { margin: 10mm; }
+
+            .actions {
+                display: none;
+            }
+
+            .ticket-container {
+                box-shadow: none;
+                width: 100%;
+            }
         }
     </style>
+
 </head>
+
 <body>
 
-    <%- include('partials/sidebar', { page: 'pos' }) %>
+    <div class="ticket-container">
 
-    <div class="main-content">
-        <div class="action-bar">
+        <!-- HEADER -->
+
+        <div class="ticket-header">
+
             <div>
-                <h2 style="font-size: 1.2rem;">Vista de Ticket</h2>
-                <p style="color:#888; font-size:0.85rem;">Ticket #SF-<%= new Date(ticket.fecha).getFullYear() %>-<%= ticket.id.toString().padStart(4, '0') %></p>
+
+                <h1>
+                    SOLO FRENOS
+                </h1>
+
+                <p>
+                    Sistema POS Automotriz
+                </p>
+
             </div>
-            <div style="display:flex; gap:10px;">
-                <button class="btn-outline" onclick="window.print()">🖨️ Imprimir</button>
-                <a href="/pos" class="btn btn-primary" style="text-decoration:none;">⬅ Volver al POS</a>
+
+            <div style="text-align:right;">
+
+                <h2>
+                    TICKET #<%= ticket.id.toString().padStart(5,'0') %>
+                </h2>
+
+                <p>
+                    <%= new Date(ticket.fecha).toLocaleString('es-CO') %>
+                </p>
+
             </div>
+
         </div>
 
-        <div class="ticket-wrapper">
-            <div class="ticket-card">
-                <div class="ticket-header-top">
-                    <div>
-                        <div class="ticket-logo">
-                            <img src="/img/Logo.png" alt="Solo Frenos Logo" style="height: 80px; max-width: 250px; object-fit: contain;">
-                        </div>
-                        <div style="font-size:0.8rem; color:#888; margin-top:15px; line-height:1.6;">
-                            Expertos en Seguridad Automotriz<br>
-                            Av. Principal Industrial #402<br>
-                            Tel: (555) 123-4567
-                        </div>
-                    </div>
-                    <div class="ticket-info">
-                        <div class="ticket-title">RECIBO DE VENTA</div>
-                        <% const d = new Date(ticket.fecha); %>
-                        Fecha: <strong><%= d.toLocaleDateString() %></strong><br>
-                        Hora: <strong><%= d.toLocaleTimeString() %></strong><br>
-                        Folio: <strong>#SF-<%= d.getFullYear() %>-<%= ticket.id.toString().padStart(4, '0') %></strong><br>
-                        <div style="margin-top: 10px; color: var(--primary-red);">
-                            Atendido por: <strong><%= ticket.vendedor %></strong>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="ticket-body">
-                    <div class="info-grid">
-                        <div class="info-col">
-                            <label>Cliente</label>
-                            <div class="val"><%= ticket.cliente_nombre %></div>
-                            <div class="sub-val"><%= ticket.telefono ? 'Tel: ' + ticket.telefono : '' %></div>
-                            <div class="sub-val"><%= ticket.cedula ? 'C.C: ' + ticket.cedula : '' %></div>
-                        </div>
-                        <div class="info-col" style="text-align:right;">
-                            <label>Vehículo (Ref)</label>
-                            <div class="val">No especificado</div>
-                            <div class="sub-val">-</div>
-                        </div>
-                    </div>
+        <!-- INFO -->
 
-                    <table class="items-table">
-                        <thead>
+        <div class="ticket-info">
+
+            <div class="info-box">
+
+                <h3>
+                    Cliente
+                </h3>
+
+                <p>
+                    <strong>Nombre:</strong>
+                    <%= ticket.cliente_nombre || 'Consumidor Final' %>
+                </p>
+
+                <p>
+                    <strong>Cédula:</strong>
+                    <%= ticket.cedula || 'N/A' %>
+                </p>
+
+                <p>
+                    <strong>Teléfono:</strong>
+                    <%= ticket.telefono || 'N/A' %>
+                </p>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <h3>
+                    Vendedor
+                </h3>
+
+                <p>
+                    <strong>Atendido por:</strong>
+                    <%= ticket.vendedor || 'Administrador' %>
+                </p>
+
+                <p>
+                    <strong>Método:</strong>
+                    Efectivo
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- TABLA -->
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Producto
+                    </th>
+
+                    <th style="text-align:center;">
+                        Cant.
+                    </th>
+
+                    <th style="text-align:right;">
+                        Precio
+                    </th>
+
+                    <th style="text-align:right;">
+                        Subtotal
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                <% let subtotal_sum=0; %>
+
+                    <% detalles.forEach(d=> { %>
+
+                        <% let row_sub=d.cantidad * d.precio; subtotal_sum +=row_sub; %>
+
                             <tr>
-                                <th>Descripción</th>
-                                <th style="text-align:center;">Cant.</th>
-                                <th style="text-align:right;">Unitario</th>
-                                <th style="text-align:right;">Subtotal</th>
+
+                                <td class="desc-col">
+
+                                    <%= d.producto_nombre %>
+
+                                        <span class="sub-desc">
+                                            Cod: P-<%= d.producto_id.toString().padStart(3,'0') %>
+                                        </span>
+
+                                </td>
+
+                                <td style="text-align:center;">
+
+                                    <%= d.cantidad %>
+
+                                </td>
+
+                                <td style="text-align:right;">
+
+                                    $<%= Math.round(d.precio).toLocaleString('es-CO') %>
+
+                                </td>
+
+                                <td style="text-align:right; font-weight:bold;">
+
+                                    $<%= Math.round(row_sub).toLocaleString('es-CO') %>
+
+                                </td>
+
                             </tr>
-                        </thead>
-                        <tbody>
-                            <% let subtotal_sum = 0; %>
-                            <% detalles.forEach(d => { %>
-                                <% let row_sub = d.cantidad * d.precio; subtotal_sum += row_sub; %>
-                                <tr>
-                                    <td class="desc-col">
-                                        <%= d.producto_nombre %>
-                                        <span class="sub-desc">Cod: P-<%= d.producto_id.toString().padStart(3, '0') %></span>
-                                    </td>
-                                    <td style="text-align:center;"><%= d.cantidad %></td>
-                                    <td style="text-align:right;">$<%= d.precio.toLocaleString('es-CO') %></td>
-                                    <td style="text-align:right; font-weight:bold;">$<%= row_sub.toLocaleString('es-CO') %></td>
-                                </tr>
+
                             <% }) %>
-                        </tbody>
-                    </table>
 
-                    <div class="totals-section">
-                        <div class="totals-box">
-                            <div class="t-row">
-                                <span>Subtotal</span>
-                                <span>$<%= subtotal_sum.toLocaleString('es-CO') %></span>
-                            </div>
-                            <div class="t-row">
-                                <span>IVA (16%)</span>
-                                <span>$<%= (subtotal_sum * 0.16).toLocaleString('es-CO') %></span>
-                            </div>
-                            <div class="t-row grand">
-                                <span>TOTAL</span>
-                                <span class="val">$<%= ticket.total.toLocaleString('es-CO') %></span>
-                            </div>
-                        </div>
-                    </div>
+            </tbody>
+
+        </table>
+
+
+        <!-- TOTALES -->
+
+        <div class="totals-section">
+
+            <div class="totals-box">
+
+                <div class="t-row">
+
+                    <span>
+                        Subtotal
+                    </span>
+
+                    <span>
+                        $<%= Math.round(subtotal_sum).toLocaleString('es-CO') %>
+                    </span>
+
                 </div>
 
-                <div class="ticket-footer">
-                    <div class="warranty-box">
-                        ** Garantía de 6 meses o 10,000 km en balatas por defectos de fabricación. La seguridad es nuestra prioridad. Gracias por su confianza. **
-                    </div>
-                    <div style="background: white; padding: 10px; border-radius: 5px; display: inline-block; margin-bottom: 10px;">
-                        <canvas id="qrcode"></canvas>
-                    </div>
-                    <div style="font-size:0.7rem; color:#666; letter-spacing:2px; text-transform:uppercase;">
-                        SF-<%= ticket.id %>-<%= ticket.cliente_nombre.substring(0,3) %>-POS
-                    </div>
+
+                <div class="t-row">
+
+                    <span>
+                        IVA (16%)
+                    </span>
+
+                    <span>
+                        $<%= Math.round(subtotal_sum * 0.16).toLocaleString('es-CO') %>
+                    </span>
+
                 </div>
+
+
+                <div class="t-row grand">
+
+                    <span>
+                        TOTAL
+                    </span>
+
+                    <span class="val">
+                        $<%= Math.round(ticket.total).toLocaleString('es-CO') %>
+                    </span>
+
+                </div>
+
             </div>
+
         </div>
+
+
+        <!-- FOOTER -->
+
+        <div class="footer">
+
+            Gracias por confiar en
+            <strong>
+                Solo Frenos
+            </strong>
+
+            <br><br>
+
+            Sistema POS Automotriz
+
+        </div>
+
     </div>
 
-    <!-- Generador de Código QR -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-    <script>
-        // Generar un código QR escaneable basado en el ID del ticket
-        var qrUrl = window.location.origin + '/ticket/public/<%= ticket.id %>';
-        new QRious({
-            element: document.getElementById('qrcode'),
-            value: qrUrl,
-            size: 120,
-            background: 'white',
-            foreground: 'black'
-        });
-    </script>
+
+    <!-- BOTONES -->
+
+    <div class="actions">
+
+        <button class="btn btn-print" onclick="window.print()">
+            🖨 Imprimir
+        </button>
+
+        <a href="/pos" class="btn btn-back">
+            ← Volver
+        </a>
+
+    </div>
+
 </body>
+
 </html>

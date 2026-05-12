@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Movimientos de Inventario
+    </title>
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+
+            font-family: Arial, sans-serif;
+
+            background: #0f0f0f;
+
+            color: white;
+
+            display: flex;
+
+            min-height: 100vh;
+        }
+
+        .main-content {
+
+            flex: 1;
+
+            padding: 30px;
+        }
+
+        .page-title {
+
+            font-size: 28px;
+
+            margin-bottom: 25px;
+
+            font-weight: bold;
+        }
+
+        .table-container {
+
+            background: #1a1a1a;
+
+            border-radius: 15px;
+
+            overflow: hidden;
+
+            border: 1px solid #2b2b2b;
+
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        table {
+
+            width: 100%;
+
+            border-collapse: collapse;
+        }
+
+        thead {
+
+            background: #202020;
+        }
+
+        thead th {
+
+            padding: 18px;
+
+            text-align: left;
+
+            color: #ffffff;
+
+            font-size: 14px;
+
+            border-bottom: 1px solid #333;
+        }
+
+        tbody tr {
+
+            border-bottom: 1px solid #2c2c2c;
+
+            transition: 0.2s;
+        }
+
+        tbody tr:hover {
+
+            background: #252525;
+        }
+
+        tbody td {
+
+            padding: 16px;
+
+            font-size: 14px;
+
+            color: #e4e4e4;
+        }
+
+        .badge {
+
+            padding: 6px 12px;
+
+            border-radius: 30px;
+
+            font-size: 12px;
+
+            font-weight: bold;
+
+            display: inline-block;
+        }
+
+        .venta {
+
+            background: rgba(255, 0, 0, 0.15);
+
+            color: #ff5e5e;
+        }
+
+        .entrada {
+
+            background: rgba(0, 255, 0, 0.15);
+
+            color: #42ff87;
+        }
+
+        .salida {
+
+            background: rgba(255, 165, 0, 0.15);
+
+            color: orange;
+        }
+
+        .ajuste {
+
+            background: rgba(0, 123, 255, 0.15);
+
+            color: #56a8ff;
+        }
+
+        .empty {
+
+            text-align: center;
+
+            padding: 40px;
+
+            color: #999;
+        }
+
+        .id-badge {
+
+            color: #ff4d4d;
+
+            font-weight: bold;
+        }
+
+        .cantidad {
+
+            font-weight: bold;
+
+            color: white;
+        }
+
+        .fecha {
+
+            color: #bcbcbc;
+
+            font-size: 13px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <%- include('partials/sidebar', { page: 'movimientos' }) %>
+
+
+        <!-- CONTENIDO -->
+        <div class="main-content">
+
+            <h1 class="page-title">
+                📋 Movimientos de Inventario
+            </h1>
+
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>ID</th>
+
+                            <th>Producto</th>
+
+                            <th>Usuario</th>
+
+                            <th>Tipo</th>
+
+                            <th>Cantidad</th>
+
+                            <th>Observación</th>
+
+                            <th>Fecha</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <% if (movimientos.length===0) { %>
+
+                            <tr>
+
+                                <td colspan="7" class="empty">
+                                    No hay movimientos registrados
+                                </td>
+
+                            </tr>
+
+                            <% } %>
+
+
+                                <% movimientos.forEach(m=> { %>
+
+                                    <tr>
+
+                                        <td class="id-badge">
+                                            #<%= m.id %>
+                                        </td>
+
+                                        <td>
+                                            <%= m.producto %>
+                                        </td>
+
+                                        <td>
+                                            <%= m.usuario %>
+                                        </td>
+
+                                        <td>
+
+                                            <span class="badge <%= m.tipo_movimiento %>">
+
+                                                <%= m.tipo_movimiento %>
+
+                                            </span>
+
+                                        </td>
+
+                                        <td class="cantidad">
+                                            <%= m.cantidad %>
+                                        </td>
+
+                                        <td>
+                                            <%= m.observacion %>
+                                        </td>
+
+                                        <td class="fecha">
+
+                                            <%= new Date(m.fecha_hora) .toLocaleString('es-CO') %>
+
+                                        </td>
+
+                                    </tr>
+
+                                    <% }) %>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+</body>
+
+</html>

@@ -15,16 +15,17 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Configurar sesiones (cookies seguras en producción)
-app.set('trust proxy', 1); // confiar en el primer proxy (Render)
+// Configurar sesiones
+app.set('trust proxy', 1);
+
 app.use(session({
     secret: 'solo-frenos-secret-key',
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: true,          // solo se envía por HTTPS
-        sameSite: 'lax',       // evita pérdida de cookie en redirecciones
-        maxAge: 24 * 60 * 60 * 1000 // 1 día (opcional)
+        secure: false, // localhost usa HTTP
+        sameSite: 'lax',
+        maxAge: 24 * 60 * 60 * 1000
     }
 }));
 
@@ -46,10 +47,15 @@ app.use('/api', apiRoutes);
 
 // Manejo de errores 404
 app.use((req, res) => {
-    res.status(404).render('404', { title: 'Página no encontrada' });
+    res.status(404).render('404', {
+        title: 'Página no encontrada'
+    });
 });
 
 // Iniciar servidor
 app.listen(PORT, () => {
-    console.log(`Servidor de Taller Solo Frenos corriendo en http://localhost:${PORT}`);
+
+    console.log(
+        `Servidor de Taller Solo Frenos corriendo en http://localhost:${PORT}`
+    );
 });
